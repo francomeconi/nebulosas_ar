@@ -7,15 +7,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Terraza al Cosmos - AR Carina (prueba)</title>
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <style>
   body { margin:0; overflow:hidden; font-family:-apple-system,sans-serif; }
-  #loading { position:fixed; inset:0; background:#000; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:999; font-size:16px; text-align:center; padding:20px; gap:16px; }
-  #eruda, .eruda-entry-btn, div[id^="eruda"] { z-index:2147483647 !important; }
-  #forceHideBtn { background:#e0a04a; color:#000; border:none; font-weight:600; font-size:14px; padding:10px 20px; border-radius:8px; }
+  #loading { position:fixed; inset:0; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; z-index:999; font-size:16px; text-align:center; padding:20px; }
   #hint { position:fixed; left:0; right:0; bottom:36px; z-index:20; text-align:center; color:#fff; font-size:14px; padding:0 20px; text-shadow:0 1px 6px rgba(0,0,0,0.6); transition:opacity 0.4s ease; pointer-events:none; }
   #hint.hidden { opacity:0; }
 
@@ -51,10 +47,7 @@
 </style>
 </head>
 <body>
-<div id="loading">
-  <div>Cargando reconocimiento...<br>(permití el acceso a la cámara cuando lo pida)</div>
-  <button id="forceHideBtn">Ya veo la cámara, sacar esta pantalla</button>
-</div>
+<div id="loading">Cargando reconocimiento...<br>(permití el acceso a la cámara cuando lo pida)</div>
 <div id="hint" class="hidden">Apuntá la cámara a la foto de Carina</div>
 <div id="nebulaPanel"></div>
 <div id="anclajeCaption"></div>
@@ -66,42 +59,49 @@
 
   <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
 
-  <a-entity id="target" mindar-image-target="targetIndex: 0">
-    <a-image id="annotatedPlane" src="./carina-anotada.jpg" width="1" height="1.5000" position="0 0 0.01"
-      material="shader: flat; transparent: true; opacity: 0" side="front"></a-image>
-    <a-plane id="veilPlane" width="1" height="1.5000" position="0 0 0.02" color="#0c0c0e"
-      material="shader: flat; transparent: true; opacity: 0" side="front"></a-plane>
-  </a-entity>
+  <a-entity id="target" mindar-image-target="targetIndex: 0"></a-entity>
 
 </a-scene>
 
 <script>
-  var DATA = {"titulo": "Carina", "catalogo": "NGC 3372", "constelacion": "Carina", "tipo": "Nebulosa de emisión", "distancia": "≈7.500 años luz", "paleta": "SHO", "horas": "7", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7500 años, durante la difusión de la agricultura por el sur de Europa."};
-
-  // --- timings (los mismos que ajustamos en el simulador) ---
-  var IMAGE_FADE_MS = 550;
-  var HOLD_MS = 1500;
-  var VEIL_FADE_MS = 350;
-  var VEIL_OPACITY = 0.55;
-  var TEXT_DELAY_MS = 350;
-  var TYPING_SPEED = 18;
-
-  var loading = document.getElementById('loading');
-  document.getElementById('forceHideBtn').addEventListener('click', function () {
-    loading.classList.add('hidden');
-    loading.style.display = 'none';
+  // Igual que en la version que anda: solo esto corre al cargar la pagina.
+  document.querySelector('a-scene').addEventListener('renderstart', () => {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('hint').classList.remove('hidden');
   });
+
+  var DATA = {"titulo": "Carina", "catalogo": "NGC 3372", "constelacion": "Carina", "tipo": "Nebulosa de emisión", "distancia": "≈7.500 años luz", "paleta": "SHO", "horas": "7", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7500 años, durante la difusión de la agricultura por el sur de Europa."};
+  var IMAGE_FADE_MS = 550, HOLD_MS = 1500, VEIL_FADE_MS = 350, VEIL_OPACITY = 0.55, TEXT_DELAY_MS = 350, TYPING_SPEED = 18;
+
   var hint = document.getElementById('hint');
   var panelEl = document.getElementById('nebulaPanel');
   var captionEl = document.getElementById('anclajeCaption');
   var toggleBtn = document.getElementById('textToggleBtn');
-  var annotatedPlane = document.getElementById('annotatedPlane');
-  var veilPlane = document.getElementById('veilPlane');
 
   var timers = [];
-  function clearAllTimers() {
-    timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
-    timers = [];
+  function clearAllTimers() { timers.forEach(function (t) { clearTimeout(t); clearInterval(t); }); timers = []; }
+
+  // Las entidades 3D (imagen anotada + velo) se crean recien cuando el
+  // target ya fue reconocido -- no existen en la escena desde el arranque.
+  var annotatedPlane = null, veilPlane = null;
+  function ensurePlanes() {
+    if (annotatedPlane) return;
+    var target = document.getElementById('target');
+    annotatedPlane = document.createElement('a-image');
+    annotatedPlane.setAttribute('src', './carina-anotada.jpg');
+    annotatedPlane.setAttribute('width', '1');
+    annotatedPlane.setAttribute('height', '1.5000');
+    annotatedPlane.setAttribute('position', '0 0 0.01');
+    annotatedPlane.setAttribute('material', 'shader: flat; transparent: true; opacity: 0');
+    target.appendChild(annotatedPlane);
+
+    veilPlane = document.createElement('a-plane');
+    veilPlane.setAttribute('width', '1');
+    veilPlane.setAttribute('height', '1.5000');
+    veilPlane.setAttribute('position', '0 0 0.02');
+    veilPlane.setAttribute('color', '#0c0c0e');
+    veilPlane.setAttribute('material', 'shader: flat; transparent: true; opacity: 0');
+    target.appendChild(veilPlane);
   }
 
   function tweenOpacity(el, from, to, durationMs, onDone) {
@@ -112,11 +112,7 @@
       i++;
       var v = from + (to - from) * (i / steps);
       el.setAttribute('material', 'opacity', v);
-      if (i >= steps) {
-        clearInterval(t);
-        el.setAttribute('material', 'opacity', to);
-        if (onDone) onDone();
-      }
+      if (i >= steps) { clearInterval(t); el.setAttribute('material', 'opacity', to); if (onDone) onDone(); }
     }, 30);
     timers.push(t);
   }
@@ -138,8 +134,7 @@
     if (code === 'RGB') {
       sentence = 'Esta imagen fue tomada en color real.';
     } else {
-      var letters = code.split('');
-      var names = letters.map(function (l) { return gasNames[l] || l; });
+      var names = code.split('').map(function (l) { return gasNames[l] || l; });
       sentence = 'Esta imagen fue tomada utilizando filtros de banda estrecha que sólo registran la luz emitida por los distintos gases de la nebulosa. El canal rojo corresponde al ' + names[0] + ', el canal verde al ' + names[1] + ' y el canal azul al ' + names[2] + '.';
     }
     flat.push({ type: 'value', text: sentence });
@@ -153,10 +148,7 @@
     var t = setInterval(function () {
       i++;
       captionEl.textContent = text.slice(0, i);
-      if (i >= text.length) {
-        clearInterval(t);
-        if (onDone) onDone();
-      }
+      if (i >= text.length) { clearInterval(t); if (onDone) onDone(); }
     }, TYPING_SPEED);
     timers.push(t);
   }
@@ -172,9 +164,7 @@
     var t = setInterval(function () {
       if (chunkI >= flat.length) {
         clearInterval(t);
-        typeCaption(d.anclaje, function () {
-          toggleBtn.classList.add('shown');
-        });
+        typeCaption(d.anclaje, function () { toggleBtn.classList.add('shown'); });
         return;
       }
       var chunk = flat[chunkI];
@@ -198,20 +188,20 @@
     if (textVisible) {
       panelEl.classList.add('visible');
       captionEl.classList.add('visible');
-      veilPlane.setAttribute('material', 'opacity', VEIL_OPACITY);
+      if (veilPlane) veilPlane.setAttribute('material', 'opacity', VEIL_OPACITY);
       toggleBtn.textContent = 'Ocultar texto';
     } else {
       panelEl.classList.remove('visible');
       captionEl.classList.remove('visible');
-      veilPlane.setAttribute('material', 'opacity', 0);
+      if (veilPlane) veilPlane.setAttribute('material', 'opacity', 0);
       toggleBtn.textContent = 'Mostrar texto';
     }
   });
 
   function resetSequence() {
     clearAllTimers();
-    annotatedPlane.setAttribute('material', 'opacity', 0);
-    veilPlane.setAttribute('material', 'opacity', 0);
+    if (annotatedPlane) annotatedPlane.setAttribute('material', 'opacity', 0);
+    if (veilPlane) veilPlane.setAttribute('material', 'opacity', 0);
     panelEl.classList.remove('visible');
     panelEl.innerHTML = '';
     captionEl.classList.remove('visible');
@@ -221,6 +211,7 @@
   }
 
   function runSequence() {
+    ensurePlanes();
     resetSequence();
     tweenOpacity(annotatedPlane, 0, 1, IMAGE_FADE_MS, function () {
       var t1 = setTimeout(function () {
@@ -232,21 +223,6 @@
       timers.push(t1);
     });
   }
-
-  window.addEventListener('error', function (e) {
-    loading.classList.remove('hidden');
-    loading.innerHTML = 'Error al cargar:<br>' + (e.message || e) + '<br><br>Sacale una foto a esto y mandásela a Claude.';
-  });
-
-  var stuckTimer = setTimeout(function () {
-    loading.querySelector('div').innerHTML = 'Está tardando más de lo normal en arrancar la cámara.<br>Revisá el permiso de cámara del navegador, o sacale una foto a esto y mandásela a Claude.';
-  }, 8000);
-
-  document.querySelector('a-scene').addEventListener('renderstart', () => {
-    clearTimeout(stuckTimer);
-    loading.style.display = 'none';
-    hint.classList.remove('hidden');
-  });
 
   var target = document.getElementById('target');
   target.addEventListener('targetFound', function () {
