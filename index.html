@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Terraza al Cosmos - AR Carina (prueba)</title>
+<title>Terraza al Cosmos - AR Nebulosas (prueba)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,6 +15,7 @@
 <style>
   body { margin:0; overflow:hidden; font-family:-apple-system,sans-serif; }
   #loading { position:fixed; inset:0; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; z-index:999; font-size:16px; text-align:center; padding:20px; }
+
   #hint {
     position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
     z-index:20; text-align:center; color:#fff; font-size:15px; line-height:1.4;
@@ -29,7 +30,7 @@
     color:#eaf6ff; z-index:30; pointer-events:none;
     text-shadow:0 1px 3px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6);
     opacity:0; transition:opacity 0.3s ease;
-    white-space:pre-wrap; font-size:13.5px; line-height:1.4; letter-spacing:0.3px;
+    white-space:pre-wrap; font-size:13.5px; line-height:1.4; letter-spacing:0.3px; font-weight:500;
   }
   #nebulaPanel.visible { opacity:1; }
   #nebulaPanel .label { color:#9fd8ff; opacity:0.85; }
@@ -41,7 +42,7 @@
     font-family:'Inter', sans-serif; font-style:italic;
     font-size:13px; line-height:1.4; color:#eee;
     text-shadow:0 1px 4px rgba(0,0,0,0.9);
-    opacity:0; transition:opacity 0.4s ease; text-align:left; pointer-events:none;
+    opacity:0; transition:opacity 0.5s ease; text-align:left; pointer-events:none;
   }
   #anclajeCaption.visible { opacity:1; }
 
@@ -72,39 +73,45 @@
 
   <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
 
-  <a-entity id="target" mindar-image-target="targetIndex: 0"></a-entity>
+  <a-entity id="target-0" mindar-image-target="targetIndex: 0"></a-entity>
+  <a-entity id="target-1" mindar-image-target="targetIndex: 1"></a-entity>
+  <a-entity id="target-2" mindar-image-target="targetIndex: 2"></a-entity>
 
 </a-scene>
 
 <script>
-  // Igual que en la version que anda: solo esto corre al cargar la pagina.
   document.querySelector('a-scene').addEventListener('renderstart', () => {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('hint').classList.remove('hidden');
   });
 
-  var DATA = {"titulo": "Carina", "catalogo": "NGC 3372", "constelacion": "Carina", "tipo": "Nebulosa de emisión", "distancia": "≈7.500 años luz", "paleta": "SHO", "horas": "7", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7500 años, durante la difusión de la agricultura por el sur de Europa."};
-  var IMAGE_FADE_MS = 550, VEIL_FADE_MS = 400, VEIL_OPACITY = 0.55, TYPING_SPEED = 9;
+  var NEBULAS = [{"titulo": "Carina", "catalogo": "NGC 3372", "constelacion": "Carina", "tipo": "Nebulosa de emisión", "distancia": "≈7.500 años luz", "paleta": "SHO", "horas": "7", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7500 años, durante la difusión de la agricultura por el sur de Europa.", "aspect": 1.5, "overlay": "./carina-overlay.png"}, {"titulo": "Pléyades", "catalogo": "M45", "constelacion": "Tauro", "tipo": "Cúmulo estelar + nebulosa de reflexión", "distancia": "≈444 años luz", "paleta": "RGB", "horas": "5", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 444 años, cuando Shakespeare comenzaba a escribir sus obras.", "aspect": 1.5, "overlay": "./pleyades-overlay.png"}, {"titulo": "Pilares de la Creación", "catalogo": "M16", "constelacion": "Serpiente", "tipo": "Nebulosa de emisión", "distancia": "≈7.000 años luz", "paleta": "SHO", "horas": "21", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7000 años, cuando comenzaba la domesticación de plantas en América.", "aspect": 1.0, "overlay": "./pilares-overlay.png"}];
+  var VEIL_OPACITY = 0.55, VEIL_FADE_MS = 400, IMAGE_FADE_MS = 550, TYPING_SPEED = 9;
+  var CAPTION_MODE = 'fade';
 
   var hint = document.getElementById('hint');
   var panelEl = document.getElementById('nebulaPanel');
   var captionEl = document.getElementById('anclajeCaption');
+  var fichaBtn = document.getElementById('textToggleBtn');
   var dimOverlay = document.getElementById('dimOverlay');
 
   var timers = [];
   function clearAllTimers() { timers.forEach(function (t) { clearTimeout(t); clearInterval(t); }); timers = []; }
 
-  var annotatedPlane = null;
-  function ensurePlanes() {
-    if (annotatedPlane) return;
-    var target = document.getElementById('target');
-    annotatedPlane = document.createElement('a-image');
-    annotatedPlane.setAttribute('src', './carina-overlay.png');
-    annotatedPlane.setAttribute('width', '1');
-    annotatedPlane.setAttribute('height', '1.5000');
-    annotatedPlane.setAttribute('position', '0 0 0.01');
-    annotatedPlane.setAttribute('material', 'shader: flat; transparent: true; opacity: 0');
-    target.appendChild(annotatedPlane);
+  var planes = {}; // targetIndex -> a-image element
+  function ensurePlane(idx) {
+    if (planes[idx]) return planes[idx];
+    var n = NEBULAS[idx];
+    var target = document.getElementById('target-' + idx);
+    var plane = document.createElement('a-image');
+    plane.setAttribute('src', n.overlay);
+    plane.setAttribute('width', '1');
+    plane.setAttribute('height', n.aspect.toFixed(4));
+    plane.setAttribute('position', '0 0 0.01');
+    plane.setAttribute('material', 'shader: flat; transparent: true; opacity: 0');
+    target.appendChild(plane);
+    planes[idx] = plane;
+    return plane;
   }
 
   function tweenOpacity(el, from, to, durationMs, onDone) {
@@ -120,6 +127,14 @@
     timers.push(t);
   }
 
+  var gasNames = { S: 'azufre', H: 'hidrógeno', O: 'oxígeno' };
+  function paletteSentence(codeRaw) {
+    var code = codeRaw.toUpperCase();
+    if (code === 'RGB') return 'Esta imagen fue tomada en color real.';
+    var names = code.split('').map(function (l) { return gasNames[l] || l; });
+    return 'Esta imagen fue tomada utilizando filtros de banda estrecha que sólo registran la luz emitida por los distintos gases de la nebulosa. El canal rojo corresponde al ' + names[0] + ', el canal verde al ' + names[1] + ' y el canal azul al ' + names[2] + '.';
+  }
+
   function buildFlat(d) {
     var pairs = [
       ['TÍTULO', d.titulo], ['CATÁLOGO', d.catalogo], ['TIPO', d.tipo],
@@ -131,20 +146,9 @@
       flat.push({ type: 'label', text: pair[0] + '\n' });
       flat.push({ type: 'value', text: pair[1] + '\n\n' });
     });
-    var gasNames = { S: 'azufre', H: 'hidrógeno', O: 'oxígeno' };
-    var code = d.paleta.toUpperCase();
-    var sentence;
-    if (code === 'RGB') {
-      sentence = 'Esta imagen fue tomada en color real.';
-    } else {
-      var names = code.split('').map(function (l) { return gasNames[l] || l; });
-      sentence = 'Esta imagen fue tomada utilizando filtros de banda estrecha que sólo registran la luz emitida por los distintos gases de la nebulosa. El canal rojo corresponde al ' + names[0] + ', el canal verde al ' + names[1] + ' y el canal azul al ' + names[2] + '.';
-    }
-    flat.push({ type: 'value', text: sentence });
+    flat.push({ type: 'value', text: paletteSentence(d.paleta) });
     return flat;
   }
-
-  var CAPTION_MODE = 'fade'; // 'type' o 'fade'
 
   function revealCaption(text, onDone) {
     if (CAPTION_MODE === 'fade') {
@@ -194,22 +198,34 @@
     timers.push(t);
   }
 
-  var fichaBtn = document.getElementById('textToggleBtn');
+  var activeIdx = null;
   var fichaShown = false;
   var typedOnce = false;
 
-  window.addEventListener('load', function () {
-    setTimeout(function () { window.scrollTo(0, 1); }, 300);
-  });
+  function resetSequence() {
+    clearAllTimers();
+    Object.keys(planes).forEach(function (k) { planes[k].setAttribute('material', 'opacity', 0); });
+    dimOverlay.style.background = 'rgba(12,12,14,0)';
+    panelEl.classList.remove('visible');
+    panelEl.innerHTML = '';
+    captionEl.classList.remove('visible');
+    captionEl.textContent = '';
+    fichaBtn.classList.remove('shown');
+    fichaBtn.textContent = 'Ver ficha técnica';
+    fichaShown = false;
+    typedOnce = false;
+  }
 
   fichaBtn.addEventListener('click', function () {
+    if (activeIdx === null) return;
+    var d = NEBULAS[activeIdx];
     fichaShown = !fichaShown;
     if (fichaShown) {
       dimOverlay.style.transition = 'background-color ' + VEIL_FADE_MS + 'ms ease';
       dimOverlay.style.background = 'rgba(12,12,14,' + VEIL_OPACITY + ')';
       if (!typedOnce) {
         typedOnce = true;
-        startPanelTyping(DATA);
+        startPanelTyping(d);
       } else {
         panelEl.classList.add('visible');
         captionEl.classList.add('visible');
@@ -223,32 +239,22 @@
     }
   });
 
-  function resetSequence() {
-    clearAllTimers();
-    if (annotatedPlane) annotatedPlane.setAttribute('material', 'opacity', 0);
-    dimOverlay.style.background = 'rgba(12,12,14,0)';
-    panelEl.classList.remove('visible');
-    panelEl.innerHTML = '';
-    captionEl.classList.remove('visible');
-    captionEl.textContent = '';
-    fichaBtn.classList.remove('shown');
-    fichaBtn.textContent = 'Ver ficha técnica';
-    fichaShown = false;
-    typedOnce = false;
-  }
-
-  var target = document.getElementById('target');
-  target.addEventListener('targetFound', function () {
-    hint.classList.add('hidden');
-    ensurePlanes();
-    resetSequence();
-    // El overlay de PixInsight aparece solo, apenas se reconoce la obra.
-    tweenOpacity(annotatedPlane, 0, 1, IMAGE_FADE_MS);
-    fichaBtn.classList.add('shown');
-  });
-  target.addEventListener('targetLost', function () {
-    hint.classList.remove('hidden');
-    resetSequence();
+  NEBULAS.forEach(function (n, idx) {
+    var t = document.getElementById('target-' + idx);
+    t.addEventListener('targetFound', function () {
+      hint.classList.add('hidden');
+      activeIdx = idx;
+      var plane = ensurePlane(idx);
+      resetSequence();
+      tweenOpacity(plane, 0, 1, IMAGE_FADE_MS);
+      fichaBtn.classList.add('shown');
+    });
+    t.addEventListener('targetLost', function () {
+      if (activeIdx !== idx) return;
+      hint.classList.remove('hidden');
+      activeIdx = null;
+      resetSequence();
+    });
   });
 </script>
 </body>
