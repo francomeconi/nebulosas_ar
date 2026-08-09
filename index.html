@@ -15,11 +15,16 @@
 <style>
   body { margin:0; overflow:hidden; font-family:-apple-system,sans-serif; }
   #loading { position:fixed; inset:0; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; z-index:999; font-size:16px; text-align:center; padding:20px; }
-  #hint { position:fixed; left:0; right:0; bottom:36px; z-index:20; text-align:center; color:#fff; font-size:14px; padding:0 20px; text-shadow:0 1px 6px rgba(0,0,0,0.6); transition:opacity 0.4s ease; pointer-events:none; }
+  #hint {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:20; text-align:center; color:#fff; font-size:15px; line-height:1.4;
+    background:rgba(12,12,14,0.62); padding:16px 22px; border-radius:12px;
+    max-width:78%; transition:opacity 0.4s ease; pointer-events:none;
+  }
   #hint.hidden { opacity:0; }
 
   #nebulaPanel {
-    position:fixed; top:24px; left:20px; right:20px; max-width:420px;
+    position:fixed; top:56px; left:20px; right:20px; max-width:420px;
     font-family:'Inter', sans-serif;
     color:#eaf6ff; z-index:30; pointer-events:none;
     text-shadow:0 1px 3px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6);
@@ -41,7 +46,7 @@
   #anclajeCaption.visible { opacity:1; }
 
   #textToggleBtn {
-    position:fixed; top:16px; right:16px; z-index:31;
+    position:fixed; top:48px; right:16px; z-index:31;
     background:#1a1a1a; color:#fff; border:1px solid rgba(255,255,255,0.25);
     font-size:13px; padding:9px 16px; border-radius:999px;
     opacity:0; pointer-events:none; transition:opacity 0.3s ease;
@@ -55,7 +60,7 @@
 </head>
 <body>
 <div id="loading">Cargando reconocimiento...<br>(permití el acceso a la cámara cuando lo pida)</div>
-<div id="hint" class="hidden">Apuntá la cámara a la foto de Carina</div>
+<div id="hint" class="hidden">Apuntá la cámara a una foto<br>para ver su información</div>
 <div id="nebulaPanel"></div>
 <div id="anclajeCaption"></div>
 <div id="dimOverlay"></div>
@@ -193,25 +198,11 @@
   var fichaShown = false;
   var typedOnce = false;
 
-  // Pantalla completa: funciona en Android/Chrome, no tiene efecto en iPhone/Safari
-  // (Apple no permite fullscreen real en paginas web comunes). Se pide en el primer
-  // toque del boton, que ya es un gesto de usuario valido.
-  var fsRequested = false;
-  function tryFullscreen() {
-    if (fsRequested) return;
-    fsRequested = true;
-    var el = document.documentElement;
-    var req = el.requestFullscreen || el.webkitRequestFullscreen;
-    if (req) {
-      req.call(el).catch(function () { /* silencioso: no soportado, ej. iOS */ });
-    }
-  }
   window.addEventListener('load', function () {
     setTimeout(function () { window.scrollTo(0, 1); }, 300);
   });
 
   fichaBtn.addEventListener('click', function () {
-    tryFullscreen();
     fichaShown = !fichaShown;
     if (fichaShown) {
       dimOverlay.style.transition = 'background-color ' + VEIL_FADE_MS + 'ms ease';
