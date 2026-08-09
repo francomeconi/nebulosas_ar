@@ -44,6 +44,10 @@
     opacity:0; pointer-events:none; transition:opacity 0.3s ease;
   }
   #textToggleBtn.shown { opacity:1; pointer-events:auto; }
+
+  .a-enter-vr, .a-enter-ar { display:none !important; }
+
+  #dimOverlay { position:fixed; inset:0; z-index:25; background:rgba(12,12,14,0); transition:background-color 0.35s ease; pointer-events:none; }
 </style>
 </head>
 <body>
@@ -51,6 +55,7 @@
 <div id="hint" class="hidden">Apuntá la cámara a la foto de Carina</div>
 <div id="nebulaPanel"></div>
 <div id="anclajeCaption"></div>
+<div id="dimOverlay"></div>
 <button id="textToggleBtn">Ocultar texto</button>
 
 <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 3; missTolerance: 10;"
@@ -81,9 +86,10 @@
   var timers = [];
   function clearAllTimers() { timers.forEach(function (t) { clearTimeout(t); clearInterval(t); }); timers = []; }
 
-  // Las entidades 3D (imagen anotada + velo) se crean recien cuando el
-  // target ya fue reconocido -- no existen en la escena desde el arranque.
-  var annotatedPlane = null, veilPlane = null;
+  // La entidad 3D (solo la imagen anotada) se crea recien cuando el
+  // target ya fue reconocido -- no existe en la escena desde el arranque.
+  var annotatedPlane = null;
+  var dimOverlay = document.getElementById('dimOverlay');
   function ensurePlanes() {
     if (annotatedPlane) return;
     var target = document.getElementById('target');
@@ -94,14 +100,6 @@
     annotatedPlane.setAttribute('position', '0 0 0.01');
     annotatedPlane.setAttribute('material', 'shader: flat; transparent: true; opacity: 0');
     target.appendChild(annotatedPlane);
-
-    veilPlane = document.createElement('a-plane');
-    veilPlane.setAttribute('width', '1');
-    veilPlane.setAttribute('height', '1.5000');
-    veilPlane.setAttribute('position', '0 0 0.02');
-    veilPlane.setAttribute('color', '#0c0c0e');
-    veilPlane.setAttribute('material', 'shader: flat; transparent: true; opacity: 0');
-    target.appendChild(veilPlane);
   }
 
   function tweenOpacity(el, from, to, durationMs, onDone) {
@@ -188,12 +186,12 @@
     if (textVisible) {
       panelEl.classList.add('visible');
       captionEl.classList.add('visible');
-      if (veilPlane) veilPlane.setAttribute('material', 'opacity', VEIL_OPACITY);
+      dimOverlay.style.background = 'rgba(12,12,14,' + VEIL_OPACITY + ')';
       toggleBtn.textContent = 'Ocultar texto';
     } else {
       panelEl.classList.remove('visible');
       captionEl.classList.remove('visible');
-      if (veilPlane) veilPlane.setAttribute('material', 'opacity', 0);
+      dimOverlay.style.background = 'rgba(12,12,14,0)';
       toggleBtn.textContent = 'Mostrar texto';
     }
   });
@@ -201,7 +199,7 @@
   function resetSequence() {
     clearAllTimers();
     if (annotatedPlane) annotatedPlane.setAttribute('material', 'opacity', 0);
-    if (veilPlane) veilPlane.setAttribute('material', 'opacity', 0);
+    dimOverlay.style.background = 'rgba(12,12,14,0)';
     panelEl.classList.remove('visible');
     panelEl.innerHTML = '';
     captionEl.classList.remove('visible');
@@ -215,10 +213,10 @@
     resetSequence();
     tweenOpacity(annotatedPlane, 0, 1, IMAGE_FADE_MS, function () {
       var t1 = setTimeout(function () {
-        tweenOpacity(veilPlane, 0, VEIL_OPACITY, VEIL_FADE_MS, function () {
-          var t2 = setTimeout(function () { startPanelTyping(DATA); }, TEXT_DELAY_MS);
-          timers.push(t2);
-        });
+        dimOverlay.style.transition = 'background-color ' + VEIL_FADE_MS + 'ms ease';
+        dimOverlay.style.background = 'rgba(12,12,14,' + VEIL_OPACITY + ')';
+        var t2 = setTimeout(function () { startPanelTyping(DATA); }, VEIL_FADE_MS + TEXT_DELAY_MS);
+        timers.push(t2);
       }, HOLD_MS);
       timers.push(t1);
     });
