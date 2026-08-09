@@ -58,7 +58,7 @@
 <div id="dimOverlay"></div>
 <button id="textToggleBtn">Ocultar texto</button>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 3; missTolerance: 10;"
+<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.00005; filterBeta: 0.0005; warmupTolerance: 5; missTolerance: 15;"
   color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights"
   vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
 
@@ -82,14 +82,12 @@
   var panelEl = document.getElementById('nebulaPanel');
   var captionEl = document.getElementById('anclajeCaption');
   var toggleBtn = document.getElementById('textToggleBtn');
+  var dimOverlay = document.getElementById('dimOverlay');
 
   var timers = [];
   function clearAllTimers() { timers.forEach(function (t) { clearTimeout(t); clearInterval(t); }); timers = []; }
 
-  // La entidad 3D (solo la imagen anotada) se crea recien cuando el
-  // target ya fue reconocido -- no existe en la escena desde el arranque.
   var annotatedPlane = null;
-  var dimOverlay = document.getElementById('dimOverlay');
   function ensurePlanes() {
     if (annotatedPlane) return;
     var target = document.getElementById('target');
