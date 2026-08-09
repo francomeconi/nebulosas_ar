@@ -45,6 +45,15 @@
   }
   #textToggleBtn.shown { opacity:1; pointer-events:auto; }
 
+  #viewInfoBtn {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    z-index:32; background:#e0a04a; color:#000; border:none; font-weight:700;
+    font-size:16px; padding:16px 32px; border-radius:999px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.5);
+    opacity:0; pointer-events:none; transition:opacity 0.3s ease, transform 0.3s ease;
+  }
+  #viewInfoBtn.shown { opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
+
   .a-enter-vr, .a-enter-ar { display:none !important; }
 
   #dimOverlay { position:fixed; inset:0; z-index:25; background:rgba(12,12,14,0); transition:background-color 0.35s ease; pointer-events:none; }
@@ -57,6 +66,7 @@
 <div id="anclajeCaption"></div>
 <div id="dimOverlay"></div>
 <button id="textToggleBtn">Ocultar texto</button>
+<button id="viewInfoBtn">Ver información</button>
 
 <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.0001; filterBeta: 0.05; warmupTolerance: 5; missTolerance: 10;"
   color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights"
@@ -76,7 +86,7 @@
   });
 
   var DATA = {"titulo": "Carina", "catalogo": "NGC 3372", "constelacion": "Carina", "tipo": "Nebulosa de emisión", "distancia": "≈7.500 años luz", "paleta": "SHO", "horas": "7", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7500 años, durante la difusión de la agricultura por el sur de Europa."};
-  var IMAGE_FADE_MS = 550, HOLD_MS = 1500, VEIL_FADE_MS = 350, VEIL_OPACITY = 0.55, TEXT_DELAY_MS = 350, TYPING_SPEED = 18;
+  var IMAGE_FADE_MS = 550, HOLD_MS = 1500, VEIL_FADE_MS = 350, VEIL_OPACITY = 0.69, TEXT_DELAY_MS = 350, TYPING_SPEED = 18;
 
   var hint = document.getElementById('hint');
   var panelEl = document.getElementById('nebulaPanel');
@@ -220,13 +230,20 @@
     });
   }
 
+  var viewInfoBtn = document.getElementById('viewInfoBtn');
+  viewInfoBtn.addEventListener('click', function () {
+    viewInfoBtn.classList.remove('shown');
+    runSequence();
+  });
+
   var target = document.getElementById('target');
   target.addEventListener('targetFound', function () {
     hint.classList.add('hidden');
-    runSequence();
+    viewInfoBtn.classList.add('shown');
   });
   target.addEventListener('targetLost', function () {
     hint.classList.remove('hidden');
+    viewInfoBtn.classList.remove('shown');
     resetSequence();
   });
 </script>
