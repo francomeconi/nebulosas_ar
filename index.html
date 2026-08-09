@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Terraza al Cosmos - AR Carina (prueba)</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<style>
+  body { margin:0; overflow:hidden; font-family:-apple-system,sans-serif; }
+  #loading { position:fixed; inset:0; background:#000; color:#fff; display:flex; align-items:center; justify-content:center; z-index:999; font-size:16px; text-align:center; padding:20px; }
+  #hint { position:fixed; left:0; right:0; bottom:36px; z-index:20; text-align:center; color:#fff; font-size:14px; padding:0 20px; text-shadow:0 1px 6px rgba(0,0,0,0.6); transition:opacity 0.4s ease; pointer-events:none; }
+  #hint.hidden { opacity:0; }
+
+  #nebulaPanel {
+    position:fixed; top:24px; left:20px; right:20px; max-width:420px;
+    font-family:'Courier New', ui-monospace, monospace;
+    color:#eaf6ff; z-index:30; pointer-events:none;
+    text-shadow:0 1px 3px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6);
+    opacity:0; transition:opacity 0.3s ease;
+    white-space:pre-wrap; font-size:13.5px; line-height:1.55; letter-spacing:0.3px;
+  }
+  #nebulaPanel.visible { opacity:1; }
+  #nebulaPanel .label { color:#9fd8ff; opacity:0.85; }
+  #nebulaPanel .cursor { display:inline-block; width:7px; background:#eaf6ff; margin-left:1px; animation:blink 0.9s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+
+  #anclajeCaption {
+    position:fixed; left:20px; right:20px; bottom:70px; z-index:30;
+    font-family:Georgia, serif; font-style:italic;
+    font-size:13px; line-height:1.4; color:#eee;
+    text-shadow:0 1px 4px rgba(0,0,0,0.9);
+    opacity:0; transition:opacity 0.4s ease; text-align:left; pointer-events:none;
+  }
+  #anclajeCaption.visible { opacity:1; }
+
+  #textToggleBtn {
+    position:fixed; bottom:16px; right:16px; z-index:31;
+    background:rgba(0,0,0,0.6); color:#fff; border:1px solid rgba(255,255,255,0.3);
+    font-size:13px; padding:9px 16px; border-radius:999px;
+    opacity:0; pointer-events:none; transition:opacity 0.3s ease;
+  }
+  #textToggleBtn.shown { opacity:1; pointer-events:auto; }
+</style>
+</head>
+<body>
+<div id="loading">Cargando reconocimiento...<br>(permití el acceso a la cámara cuando lo pida)</div>
+<div id="hint" class="hidden">Apuntá la cámara a la foto de Carina</div>
+<div id="nebulaPanel"></div>
+<div id="anclajeCaption"></div>
+<button id="textToggleBtn">Ocultar texto</button>
+
+<a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 3; missTolerance: 10;"
+  color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights"
+  vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+
+  <a-assets>
+    <img id="annotatedImg" src="./carina-anotada.jpg">
+  </a-assets>
+
+  <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
+
+  <a-entity id="target" mindar-image-target="targetIndex: 0">
+    <a-image id="annotatedPlane" src="#annotatedImg" width="1" height="1.5000" position="0 0 0.01"
+      material="shader: flat; transparent: true; opacity: 0" side="front"></a-image>
+    <a-plane id="veilPlane" width="1" height="1.5000" position="0 0 0.02" color="#0c0c0e"
+      material="shader: flat; transparent: true; opacity: 0" side="front"></a-plane>
+  </a-entity>
+
+</a-scene>
+
+<script>
+  var DATA = {"titulo": "Carina", "catalogo": "NGC 3372", "constelacion": "Carina", "tipo": "Nebulosa de emisión", "distancia": "≈7.500 años luz", "paleta": "SHO", "horas": "7", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7500 años, durante la difusión de la agricultura por el sur de Europa."};
+
+  // --- timings (los mismos que ajustamos en el simulador) ---
+  var IMAGE_FADE_MS = 550;
+  var HOLD_MS = 1500;
+  var VEIL_FADE_MS = 350;
+  var VEIL_OPACITY = 0.55;
+  var TEXT_DELAY_MS = 350;
+  var TYPING_SPEED = 18;
+
+  var loading = document.getElementById('loading');
+  var hint = document.getElementById('hint');
+  var panelEl = document.getElementById('nebulaPanel');
+  var captionEl = document.getElementById('anclajeCaption');
+  var toggleBtn = document.getElementById('textToggleBtn');
+  var annotatedPlane = document.getElementById('annotatedPlane');
+  var veilPlane = document.getElementById('veilPlane');
+
+  var timers = [];
+  function clearAllTimers() {
+    timers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
+    timers = [];
+  }
+
+  function tweenOpacity(el, from, to, durationMs, onDone) {
+    var steps = Math.max(1, Math.round(durationMs / 30));
+    var i = 0;
+    el.setAttribute('material', 'opacity', from);
+    var t = setInterval(function () {
+      i++;
+      var v = from + (to - from) * (i / steps);
+      el.setAttribute('material', 'opacity', v);
+      if (i >= steps) {
+        clearInterval(t);
+        el.setAttribute('material', 'opacity', to);
+        if (onDone) onDone();
+      }
+    }, 30);
+    timers.push(t);
+  }
+
+  function buildFlat(d) {
+    var pairs = [
+      ['TÍTULO', d.titulo], ['CATÁLOGO', d.catalogo], ['TIPO', d.tipo],
+      ['CONSTELACIÓN', d.constelacion], ['DISTANCIA', d.distancia],
+      ['HORAS DE EXPOSICIÓN', d.horas + ' h']
+    ];
+    var flat = [];
+    pairs.forEach(function (pair) {
+      flat.push({ type: 'label', text: pair[0] + '\n' });
+      flat.push({ type: 'value', text: pair[1] + '\n\n' });
+    });
+    var gasNames = { S: 'azufre', H: 'hidrógeno', O: 'oxígeno' };
+    var code = d.paleta.toUpperCase();
+    var sentence;
+    if (code === 'RGB') {
+      sentence = 'Esta imagen fue tomada en color real.';
+    } else {
+      var letters = code.split('');
+      var names = letters.map(function (l) { return gasNames[l] || l; });
+      sentence = 'Esta imagen fue tomada utilizando filtros de banda estrecha que sólo registran la luz emitida por los distintos gases de la nebulosa. El canal rojo corresponde al ' + names[0] + ', el canal verde al ' + names[1] + ' y el canal azul al ' + names[2] + '.';
+    }
+    flat.push({ type: 'value', text: sentence });
+    return flat;
+  }
+
+  function typeCaption(text, onDone) {
+    captionEl.textContent = '';
+    captionEl.classList.add('visible');
+    var i = 0;
+    var t = setInterval(function () {
+      i++;
+      captionEl.textContent = text.slice(0, i);
+      if (i >= text.length) {
+        clearInterval(t);
+        if (onDone) onDone();
+      }
+    }, TYPING_SPEED);
+    timers.push(t);
+  }
+
+  function startPanelTyping(d) {
+    panelEl.innerHTML = '';
+    panelEl.classList.add('visible');
+    var flat = buildFlat(d);
+    var cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    panelEl.appendChild(cursor);
+    var chunkI = 0, charI = 0;
+    var t = setInterval(function () {
+      if (chunkI >= flat.length) {
+        clearInterval(t);
+        typeCaption(d.anclaje, function () {
+          toggleBtn.classList.add('shown');
+        });
+        return;
+      }
+      var chunk = flat[chunkI];
+      charI++;
+      var span = panelEl.querySelector('[data-chunk="' + chunkI + '"]');
+      if (!span) {
+        span = document.createElement('span');
+        span.setAttribute('data-chunk', chunkI);
+        if (chunk.type === 'label') span.className = 'label';
+        panelEl.insertBefore(span, cursor);
+      }
+      span.textContent = chunk.text.slice(0, charI);
+      if (charI >= chunk.text.length) { chunkI++; charI = 0; }
+    }, TYPING_SPEED);
+    timers.push(t);
+  }
+
+  var textVisible = true;
+  toggleBtn.addEventListener('click', function () {
+    textVisible = !textVisible;
+    if (textVisible) {
+      panelEl.classList.add('visible');
+      captionEl.classList.add('visible');
+      veilPlane.setAttribute('material', 'opacity', VEIL_OPACITY);
+      toggleBtn.textContent = 'Ocultar texto';
+    } else {
+      panelEl.classList.remove('visible');
+      captionEl.classList.remove('visible');
+      veilPlane.setAttribute('material', 'opacity', 0);
+      toggleBtn.textContent = 'Mostrar texto';
+    }
+  });
+
+  function resetSequence() {
+    clearAllTimers();
+    annotatedPlane.setAttribute('material', 'opacity', 0);
+    veilPlane.setAttribute('material', 'opacity', 0);
+    panelEl.classList.remove('visible');
+    panelEl.innerHTML = '';
+    captionEl.classList.remove('visible');
+    captionEl.textContent = '';
+    toggleBtn.classList.remove('shown');
+    textVisible = true;
+  }
+
+  function runSequence() {
+    resetSequence();
+    tweenOpacity(annotatedPlane, 0, 1, IMAGE_FADE_MS, function () {
+      var t1 = setTimeout(function () {
+        tweenOpacity(veilPlane, 0, VEIL_OPACITY, VEIL_FADE_MS, function () {
+          var t2 = setTimeout(function () { startPanelTyping(DATA); }, TEXT_DELAY_MS);
+          timers.push(t2);
+        });
+      }, HOLD_MS);
+      timers.push(t1);
+    });
+  }
+
+  document.querySelector('a-scene').addEventListener('renderstart', () => {
+    loading.classList.add('hidden');
+    hint.classList.remove('hidden');
+  });
+
+  var target = document.getElementById('target');
+  target.addEventListener('targetFound', function () {
+    hint.classList.add('hidden');
+    runSequence();
+  });
+  target.addEventListener('targetLost', function () {
+    hint.classList.remove('hidden');
+    resetSequence();
+  });
+</script>
+</body>
+</html>
