@@ -7,6 +7,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Terraza al Cosmos - AR Carina (prueba)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 <style>
@@ -17,11 +20,11 @@
 
   #nebulaPanel {
     position:fixed; top:24px; left:20px; right:20px; max-width:420px;
-    font-family:'Courier New', ui-monospace, monospace;
+    font-family:'Inter', sans-serif;
     color:#eaf6ff; z-index:30; pointer-events:none;
     text-shadow:0 1px 3px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6);
     opacity:0; transition:opacity 0.3s ease;
-    white-space:pre-wrap; font-size:13.5px; line-height:1.55; letter-spacing:0.3px;
+    white-space:pre-wrap; font-size:13.5px; line-height:1.4; letter-spacing:0.3px;
   }
   #nebulaPanel.visible { opacity:1; }
   #nebulaPanel .label { color:#9fd8ff; opacity:0.85; }
@@ -30,7 +33,7 @@
 
   #anclajeCaption {
     position:fixed; left:20px; right:20px; bottom:70px; z-index:30;
-    font-family:Georgia, serif; font-style:italic;
+    font-family:'Inter', sans-serif; font-style:italic;
     font-size:13px; line-height:1.4; color:#eee;
     text-shadow:0 1px 4px rgba(0,0,0,0.9);
     opacity:0; transition:opacity 0.4s ease; text-align:left; pointer-events:none;
@@ -38,21 +41,12 @@
   #anclajeCaption.visible { opacity:1; }
 
   #textToggleBtn {
-    position:fixed; bottom:16px; right:16px; z-index:31;
-    background:rgba(0,0,0,0.6); color:#fff; border:1px solid rgba(255,255,255,0.3);
+    position:fixed; top:16px; right:16px; z-index:31;
+    background:#1a1a1a; color:#fff; border:1px solid rgba(255,255,255,0.25);
     font-size:13px; padding:9px 16px; border-radius:999px;
     opacity:0; pointer-events:none; transition:opacity 0.3s ease;
   }
   #textToggleBtn.shown { opacity:1; pointer-events:auto; }
-
-  #viewInfoBtn {
-    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-    z-index:32; background:#e0a04a; color:#000; border:none; font-weight:700;
-    font-size:16px; padding:16px 32px; border-radius:999px;
-    box-shadow:0 4px 20px rgba(0,0,0,0.5);
-    opacity:0; pointer-events:none; transition:opacity 0.3s ease, transform 0.3s ease;
-  }
-  #viewInfoBtn.shown { opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
 
   .a-enter-vr, .a-enter-ar { display:none !important; }
 
@@ -65,8 +59,7 @@
 <div id="nebulaPanel"></div>
 <div id="anclajeCaption"></div>
 <div id="dimOverlay"></div>
-<button id="textToggleBtn">Ocultar texto</button>
-<button id="viewInfoBtn">Ver información</button>
+<button id="textToggleBtn">Ver ficha técnica</button>
 
 <a-scene mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.0001; filterBeta: 0.05; warmupTolerance: 5; missTolerance: 10;"
   color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights"
@@ -86,12 +79,11 @@
   });
 
   var DATA = {"titulo": "Carina", "catalogo": "NGC 3372", "constelacion": "Carina", "tipo": "Nebulosa de emisión", "distancia": "≈7.500 años luz", "paleta": "SHO", "horas": "7", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7500 años, durante la difusión de la agricultura por el sur de Europa."};
-  var IMAGE_FADE_MS = 550, HOLD_MS = 1500, VEIL_FADE_MS = 350, VEIL_OPACITY = 0.69, TEXT_DELAY_MS = 350, TYPING_SPEED = 18;
+  var IMAGE_FADE_MS = 550, VEIL_FADE_MS = 400, VEIL_OPACITY = 0.55, TYPING_SPEED = 9;
 
   var hint = document.getElementById('hint');
   var panelEl = document.getElementById('nebulaPanel');
   var captionEl = document.getElementById('anclajeCaption');
-  var toggleBtn = document.getElementById('textToggleBtn');
   var dimOverlay = document.getElementById('dimOverlay');
 
   var timers = [];
@@ -147,16 +139,25 @@
     return flat;
   }
 
-  function typeCaption(text, onDone) {
-    captionEl.textContent = '';
-    captionEl.classList.add('visible');
-    var i = 0;
-    var t = setInterval(function () {
-      i++;
-      captionEl.textContent = text.slice(0, i);
-      if (i >= text.length) { clearInterval(t); if (onDone) onDone(); }
-    }, TYPING_SPEED);
-    timers.push(t);
+  var CAPTION_MODE = 'fade'; // 'type' o 'fade'
+
+  function revealCaption(text, onDone) {
+    if (CAPTION_MODE === 'fade') {
+      captionEl.textContent = text;
+      captionEl.classList.add('visible');
+      var t = setTimeout(function () { if (onDone) onDone(); }, 500);
+      timers.push(t);
+    } else {
+      captionEl.textContent = '';
+      captionEl.classList.add('visible');
+      var i = 0;
+      var t2 = setInterval(function () {
+        i++;
+        captionEl.textContent = text.slice(0, i);
+        if (i >= text.length) { clearInterval(t2); if (onDone) onDone(); }
+      }, TYPING_SPEED);
+      timers.push(t2);
+    }
   }
 
   function startPanelTyping(d) {
@@ -170,7 +171,7 @@
     var t = setInterval(function () {
       if (chunkI >= flat.length) {
         clearInterval(t);
-        typeCaption(d.anclaje, function () { toggleBtn.classList.add('shown'); });
+        revealCaption(d.anclaje);
         return;
       }
       var chunk = flat[chunkI];
@@ -188,19 +189,46 @@
     timers.push(t);
   }
 
-  var textVisible = true;
-  toggleBtn.addEventListener('click', function () {
-    textVisible = !textVisible;
-    if (textVisible) {
-      panelEl.classList.add('visible');
-      captionEl.classList.add('visible');
+  var fichaBtn = document.getElementById('textToggleBtn');
+  var fichaShown = false;
+  var typedOnce = false;
+
+  // Pantalla completa: funciona en Android/Chrome, no tiene efecto en iPhone/Safari
+  // (Apple no permite fullscreen real en paginas web comunes). Se pide en el primer
+  // toque del boton, que ya es un gesto de usuario valido.
+  var fsRequested = false;
+  function tryFullscreen() {
+    if (fsRequested) return;
+    fsRequested = true;
+    var el = document.documentElement;
+    var req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) {
+      req.call(el).catch(function () { /* silencioso: no soportado, ej. iOS */ });
+    }
+  }
+  window.addEventListener('load', function () {
+    setTimeout(function () { window.scrollTo(0, 1); }, 300);
+  });
+
+  fichaBtn.addEventListener('click', function () {
+    tryFullscreen();
+    fichaShown = !fichaShown;
+    if (fichaShown) {
+      dimOverlay.style.transition = 'background-color ' + VEIL_FADE_MS + 'ms ease';
       dimOverlay.style.background = 'rgba(12,12,14,' + VEIL_OPACITY + ')';
-      toggleBtn.textContent = 'Ocultar texto';
+      if (!typedOnce) {
+        typedOnce = true;
+        startPanelTyping(DATA);
+      } else {
+        panelEl.classList.add('visible');
+        captionEl.classList.add('visible');
+      }
+      fichaBtn.textContent = 'Ocultar ficha técnica';
     } else {
+      dimOverlay.style.background = 'rgba(12,12,14,0)';
       panelEl.classList.remove('visible');
       captionEl.classList.remove('visible');
-      dimOverlay.style.background = 'rgba(12,12,14,0)';
-      toggleBtn.textContent = 'Mostrar texto';
+      fichaBtn.textContent = 'Ver ficha técnica';
     }
   });
 
@@ -212,38 +240,23 @@
     panelEl.innerHTML = '';
     captionEl.classList.remove('visible');
     captionEl.textContent = '';
-    toggleBtn.classList.remove('shown');
-    textVisible = true;
+    fichaBtn.classList.remove('shown');
+    fichaBtn.textContent = 'Ver ficha técnica';
+    fichaShown = false;
+    typedOnce = false;
   }
-
-  function runSequence() {
-    ensurePlanes();
-    resetSequence();
-    tweenOpacity(annotatedPlane, 0, 1, IMAGE_FADE_MS, function () {
-      var t1 = setTimeout(function () {
-        dimOverlay.style.transition = 'background-color ' + VEIL_FADE_MS + 'ms ease';
-        dimOverlay.style.background = 'rgba(12,12,14,' + VEIL_OPACITY + ')';
-        var t2 = setTimeout(function () { startPanelTyping(DATA); }, VEIL_FADE_MS + TEXT_DELAY_MS);
-        timers.push(t2);
-      }, HOLD_MS);
-      timers.push(t1);
-    });
-  }
-
-  var viewInfoBtn = document.getElementById('viewInfoBtn');
-  viewInfoBtn.addEventListener('click', function () {
-    viewInfoBtn.classList.remove('shown');
-    runSequence();
-  });
 
   var target = document.getElementById('target');
   target.addEventListener('targetFound', function () {
     hint.classList.add('hidden');
-    viewInfoBtn.classList.add('shown');
+    ensurePlanes();
+    resetSequence();
+    // El overlay de PixInsight aparece solo, apenas se reconoce la obra.
+    tweenOpacity(annotatedPlane, 0, 1, IMAGE_FADE_MS);
+    fichaBtn.classList.add('shown');
   });
   target.addEventListener('targetLost', function () {
     hint.classList.remove('hidden');
-    viewInfoBtn.classList.remove('shown');
     resetSequence();
   });
 </script>
