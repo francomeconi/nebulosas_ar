@@ -67,7 +67,7 @@
 <div id="dimOverlay"></div>
 <button id="textToggleBtn">Ver ficha técnica</button>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind?v=20260809a; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.0001; filterBeta: 0.05; warmupTolerance: 5; missTolerance: 10;"
+<a-scene mindar-image="imageTargetSrc: ./targets.mind?v=20260809b; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.0001; filterBeta: 0.05; warmupTolerance: 5; missTolerance: 10;"
   color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights"
   vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
 
@@ -104,9 +104,10 @@
     var n = NEBULAS[idx];
     var target = document.getElementById('target-' + idx);
     var plane = document.createElement('a-image');
-    plane.setAttribute('src', n.overlay + '?v=20260809a');
-    plane.setAttribute('width', '1');
-    plane.setAttribute('height', n.aspect.toFixed(4));
+    plane.setAttribute('src', n.overlay + '?v=20260809b');
+    var OVERLAY_MARGIN = 0.92; // achicado a proposito para que no se pase del borde
+    plane.setAttribute('width', OVERLAY_MARGIN.toFixed(4));
+    plane.setAttribute('height', (n.aspect * OVERLAY_MARGIN).toFixed(4));
     plane.setAttribute('position', '0 0 0.01');
     plane.setAttribute('material', 'shader: flat; transparent: true; opacity: 0');
     target.appendChild(plane);
