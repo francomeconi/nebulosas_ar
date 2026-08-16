@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Terraza al Cosmos - AR Nebulosas (prueba)</title>
+<title>Terraza al Cosmos - AR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -67,7 +67,7 @@
 <div id="dimOverlay"></div>
 <button id="textToggleBtn">Ver ficha técnica</button>
 
-<a-scene mindar-image="imageTargetSrc: ./targets.mind?v=20260809c; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.0001; filterBeta: 0.2; warmupTolerance: 5; missTolerance: 10;"
+<a-scene mindar-image="imageTargetSrc: ./targets.mind?v=20260816a; autoStart: true; uiScanning: no; uiLoading: no; filterMinCF: 0.0001; filterBeta: 0.2; warmupTolerance: 5; missTolerance: 10;"
   color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights"
   vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
 
@@ -76,6 +76,15 @@
   <a-entity id="target-0" mindar-image-target="targetIndex: 0"></a-entity>
   <a-entity id="target-1" mindar-image-target="targetIndex: 1"></a-entity>
   <a-entity id="target-2" mindar-image-target="targetIndex: 2"></a-entity>
+  <a-entity id="target-3" mindar-image-target="targetIndex: 3"></a-entity>
+  <a-entity id="target-4" mindar-image-target="targetIndex: 4"></a-entity>
+  <a-entity id="target-5" mindar-image-target="targetIndex: 5"></a-entity>
+  <a-entity id="target-6" mindar-image-target="targetIndex: 6"></a-entity>
+  <a-entity id="target-7" mindar-image-target="targetIndex: 7"></a-entity>
+  <a-entity id="target-8" mindar-image-target="targetIndex: 8"></a-entity>
+  <a-entity id="target-9" mindar-image-target="targetIndex: 9"></a-entity>
+  <a-entity id="target-10" mindar-image-target="targetIndex: 10"></a-entity>
+  <a-entity id="target-11" mindar-image-target="targetIndex: 11"></a-entity>
 
 </a-scene>
 
@@ -85,7 +94,7 @@
     document.getElementById('hint').classList.remove('hidden');
   });
 
-  var NEBULAS = [{"titulo": "Carina", "catalogo": "NGC 3372", "constelacion": "Carina", "tipo": "Nebulosa de emisión", "distancia": "≈7.500 años luz", "paleta": "SHO", "horas": "7", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7500 años, durante la difusión de la agricultura por el sur de Europa.", "aspect": 1.5, "overlay": "./carina-overlay.png"}, {"titulo": "Pléyades", "catalogo": "M45", "constelacion": "Tauro", "tipo": "Cúmulo estelar + nebulosa de reflexión", "distancia": "≈444 años luz", "paleta": "RGB", "horas": "5", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 444 años, cuando Shakespeare comenzaba a escribir sus obras.", "aspect": 1.5, "overlay": "./pleyades-overlay.png"}, {"titulo": "Pilares de la Creación", "catalogo": "M16", "constelacion": "Serpiente", "tipo": "Nebulosa de emisión", "distancia": "≈7.000 años luz", "paleta": "SHO", "horas": "21", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7000 años, cuando comenzaba la domesticación de plantas en América.", "aspect": 1.0, "overlay": "./pilares-overlay.png"}];
+  var TARGETS = [{"type": "nebula", "titulo": "Carina", "catalogo": "NGC 3372", "constelacion": "Carina", "tipo": "Nebulosa de emisión", "distancia": "≈7.500 años luz", "paleta": "SHO", "horas": "7", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7500 años, durante la difusión de la agricultura por el sur de Europa.", "aspect": 1.5, "overlay": "./carina-overlay.png"}, {"type": "nebula", "titulo": "Pléyades", "catalogo": "M45", "constelacion": "Tauro", "tipo": "Cúmulo estelar + nebulosa de reflexión", "distancia": "≈444 años luz", "paleta": "RGB", "horas": "5", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 444 años, cuando Shakespeare comenzaba a escribir sus obras.", "aspect": 1.5, "overlay": "./pleyades-overlay.png"}, {"type": "nebula", "titulo": "Pilares de la Creación", "catalogo": "M16", "constelacion": "Serpiente", "tipo": "Nebulosa de emisión", "distancia": "≈7.000 años luz", "paleta": "SHO", "horas": "21", "anclaje": "La luz capturada en esta imagen partió hace aproximadamente 7000 años, cuando comenzaba la domesticación de plantas en América.", "aspect": 1.0, "overlay": "./pilares-overlay.png"}, {"type": "moon", "overlay": "./moon-01-overlay.png", "aspect": 1.0, "data": {"type": "moon", "titulo": "La Luna", "diametro": "3.474 km", "edad": "≈4.500 millones de años", "distancia": "≈384.400 km (promedio)", "fecha": "10/01/2022", "lugar": "CABA, Argentina", "nota": "Esta imagen en alta resolución fue construida como un mosaico a partir de la captura de más de 60.000 cuadros individuales. Los colores que se observan en la superficie aparecen como resultado de aplicar capas de saturación a la imagen, que revelan la presencia de distintos metales, óxidos y minerales en el suelo lunar."}}, {"type": "moon", "overlay": "./moon-02-overlay.png", "aspect": 1.0, "data": {"type": "moon", "titulo": "La Luna", "diametro": "3.474 km", "edad": "≈4.500 millones de años", "distancia": "≈384.400 km (promedio)", "fecha": "10/01/2022", "lugar": "CABA, Argentina", "nota": "Esta imagen en alta resolución fue construida como un mosaico a partir de la captura de más de 60.000 cuadros individuales. Los colores que se observan en la superficie aparecen como resultado de aplicar capas de saturación a la imagen, que revelan la presencia de distintos metales, óxidos y minerales en el suelo lunar."}}, {"type": "moon", "overlay": "./moon-03-overlay.png", "aspect": 1.0, "data": {"type": "moon", "titulo": "La Luna", "diametro": "3.474 km", "edad": "≈4.500 millones de años", "distancia": "≈384.400 km (promedio)", "fecha": "10/01/2022", "lugar": "CABA, Argentina", "nota": "Esta imagen en alta resolución fue construida como un mosaico a partir de la captura de más de 60.000 cuadros individuales. Los colores que se observan en la superficie aparecen como resultado de aplicar capas de saturación a la imagen, que revelan la presencia de distintos metales, óxidos y minerales en el suelo lunar."}}, {"type": "moon", "overlay": "./moon-04-overlay.png", "aspect": 1.0, "data": {"type": "moon", "titulo": "La Luna", "diametro": "3.474 km", "edad": "≈4.500 millones de años", "distancia": "≈384.400 km (promedio)", "fecha": "10/01/2022", "lugar": "CABA, Argentina", "nota": "Esta imagen en alta resolución fue construida como un mosaico a partir de la captura de más de 60.000 cuadros individuales. Los colores que se observan en la superficie aparecen como resultado de aplicar capas de saturación a la imagen, que revelan la presencia de distintos metales, óxidos y minerales en el suelo lunar."}}, {"type": "moon", "overlay": "./moon-05-overlay.png", "aspect": 1.0, "data": {"type": "moon", "titulo": "La Luna", "diametro": "3.474 km", "edad": "≈4.500 millones de años", "distancia": "≈384.400 km (promedio)", "fecha": "10/01/2022", "lugar": "CABA, Argentina", "nota": "Esta imagen en alta resolución fue construida como un mosaico a partir de la captura de más de 60.000 cuadros individuales. Los colores que se observan en la superficie aparecen como resultado de aplicar capas de saturación a la imagen, que revelan la presencia de distintos metales, óxidos y minerales en el suelo lunar."}}, {"type": "moon", "overlay": "./moon-06-overlay.png", "aspect": 1.0, "data": {"type": "moon", "titulo": "La Luna", "diametro": "3.474 km", "edad": "≈4.500 millones de años", "distancia": "≈384.400 km (promedio)", "fecha": "10/01/2022", "lugar": "CABA, Argentina", "nota": "Esta imagen en alta resolución fue construida como un mosaico a partir de la captura de más de 60.000 cuadros individuales. Los colores que se observan en la superficie aparecen como resultado de aplicar capas de saturación a la imagen, que revelan la presencia de distintos metales, óxidos y minerales en el suelo lunar."}}, {"type": "moon", "overlay": "./moon-07-overlay.png", "aspect": 1.0, "data": {"type": "moon", "titulo": "La Luna", "diametro": "3.474 km", "edad": "≈4.500 millones de años", "distancia": "≈384.400 km (promedio)", "fecha": "10/01/2022", "lugar": "CABA, Argentina", "nota": "Esta imagen en alta resolución fue construida como un mosaico a partir de la captura de más de 60.000 cuadros individuales. Los colores que se observan en la superficie aparecen como resultado de aplicar capas de saturación a la imagen, que revelan la presencia de distintos metales, óxidos y minerales en el suelo lunar."}}, {"type": "moon", "overlay": "./moon-08-overlay.png", "aspect": 1.0, "data": {"type": "moon", "titulo": "La Luna", "diametro": "3.474 km", "edad": "≈4.500 millones de años", "distancia": "≈384.400 km (promedio)", "fecha": "10/01/2022", "lugar": "CABA, Argentina", "nota": "Esta imagen en alta resolución fue construida como un mosaico a partir de la captura de más de 60.000 cuadros individuales. Los colores que se observan en la superficie aparecen como resultado de aplicar capas de saturación a la imagen, que revelan la presencia de distintos metales, óxidos y minerales en el suelo lunar."}}, {"type": "moon", "overlay": "./moon-09-overlay.png", "aspect": 1.0, "data": {"type": "moon", "titulo": "La Luna", "diametro": "3.474 km", "edad": "≈4.500 millones de años", "distancia": "≈384.400 km (promedio)", "fecha": "10/01/2022", "lugar": "CABA, Argentina", "nota": "Esta imagen en alta resolución fue construida como un mosaico a partir de la captura de más de 60.000 cuadros individuales. Los colores que se observan en la superficie aparecen como resultado de aplicar capas de saturación a la imagen, que revelan la presencia de distintos metales, óxidos y minerales en el suelo lunar."}}];
   var VEIL_OPACITY = 0.55, VEIL_FADE_MS = 400, IMAGE_FADE_MS = 550, TYPING_SPEED = 9;
   var CAPTION_MODE = 'fade';
 
@@ -101,13 +110,13 @@
   var planes = {}; // targetIndex -> a-image element
   function ensurePlane(idx) {
     if (planes[idx]) return planes[idx];
-    var n = NEBULAS[idx];
+    var n = TARGETS[idx];
     var target = document.getElementById('target-' + idx);
     var plane = document.createElement('a-image');
-    plane.setAttribute('src', n.overlay + '?v=20260809c');
-    var OVERLAY_MARGIN = 0.95; // achicado a proposito para que no se pase del borde
-    plane.setAttribute('width', OVERLAY_MARGIN.toFixed(4));
-    plane.setAttribute('height', (n.aspect * OVERLAY_MARGIN).toFixed(4));
+    plane.setAttribute('src', n.overlay + '?v=20260816a');
+    var margin = 0.95;
+    plane.setAttribute('width', margin.toFixed(4));
+    plane.setAttribute('height', (n.aspect * margin).toFixed(4));
     plane.setAttribute('position', '0 0 0.01');
     plane.setAttribute('material', 'shader: flat; transparent: true; opacity: 0');
     target.appendChild(plane);
@@ -137,17 +146,27 @@
   }
 
   function buildFlat(d) {
-    var pairs = [
-      ['TÍTULO', d.titulo], ['CATÁLOGO', d.catalogo], ['TIPO', d.tipo],
-      ['CONSTELACIÓN', d.constelacion], ['DISTANCIA', d.distancia],
-      ['HORAS DE EXPOSICIÓN', d.horas + ' h']
-    ];
+    var pairs, extra;
+    if (d.type === 'moon') {
+      pairs = [
+        ['TÍTULO', d.titulo], ['DIÁMETRO', d.diametro], ['EDAD', d.edad],
+        ['DISTANCIA', d.distancia], ['FECHA DE CAPTURA', d.fecha], ['LUGAR DE CAPTURA', d.lugar]
+      ];
+      extra = d.nota;
+    } else {
+      pairs = [
+        ['TÍTULO', d.titulo], ['CATÁLOGO', d.catalogo], ['TIPO', d.tipo],
+        ['CONSTELACIÓN', d.constelacion], ['DISTANCIA', d.distancia],
+        ['HORAS DE EXPOSICIÓN', d.horas + ' h']
+      ];
+      extra = paletteSentence(d.paleta);
+    }
     var flat = [];
     pairs.forEach(function (pair) {
       flat.push({ type: 'label', text: pair[0] + '\n' });
       flat.push({ type: 'value', text: pair[1] + '\n\n' });
     });
-    flat.push({ type: 'value', text: paletteSentence(d.paleta) });
+    flat.push({ type: 'value', text: extra });
     return flat;
   }
 
@@ -181,7 +200,11 @@
     var t = setInterval(function () {
       if (chunkI >= flat.length) {
         clearInterval(t);
-        revealCaption(d.anclaje);
+        if (d.anclaje) {
+          revealCaption(d.anclaje, function () { fichaBtn.classList.add('shown'); });
+        } else {
+          fichaBtn.classList.add('shown');
+        }
         return;
       }
       var chunk = flat[chunkI];
@@ -219,7 +242,7 @@
 
   fichaBtn.addEventListener('click', function () {
     if (activeIdx === null) return;
-    var d = NEBULAS[activeIdx];
+    var d = TARGETS[activeIdx];
     fichaShown = !fichaShown;
     if (fichaShown) {
       dimOverlay.style.transition = 'background-color ' + VEIL_FADE_MS + 'ms ease';
@@ -240,7 +263,7 @@
     }
   });
 
-  NEBULAS.forEach(function (n, idx) {
+  TARGETS.forEach(function (n, idx) {
     var t = document.getElementById('target-' + idx);
     t.addEventListener('targetFound', function () {
       hint.classList.add('hidden');
