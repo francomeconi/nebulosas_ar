@@ -230,6 +230,46 @@
     }
   }
 
+  function maybeShowScrollHint() {
+    var el = document.getElementById('fichaContainer');
+    if (el.scrollHeight <= el.clientHeight + 4) return; // no hay overflow, nada que insinuar
+
+    var cancelled = false;
+    function cancel() {
+      cancelled = true;
+      el.removeEventListener('touchstart', cancel);
+      el.removeEventListener('wheel', cancel);
+      el.removeEventListener('pointerdown', cancel);
+    }
+    el.addEventListener('touchstart', cancel, { once: true, passive: true });
+    el.addEventListener('wheel', cancel, { once: true, passive: true });
+    el.addEventListener('pointerdown', cancel, { once: true });
+
+    function animateTo(target, dur, done) {
+      var startTop = el.scrollTop;
+      var t0 = null;
+      function step(now) {
+        if (cancelled) return;
+        if (t0 === null) t0 = now;
+        var p = Math.min(1, (now - t0) / dur);
+        var eased = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+        el.scrollTop = startTop + (target - startTop) * eased;
+        if (p < 1) requestAnimationFrame(step);
+        else if (done) done();
+      }
+      requestAnimationFrame(step);
+    }
+
+    var peek = Math.min(80, el.scrollHeight - el.clientHeight);
+    animateTo(peek, 550, function () {
+      if (cancelled) return;
+      var t = setTimeout(function () {
+        if (!cancelled) animateTo(0, 550);
+      }, 400);
+      timers.push(t);
+    });
+  }
+
   function startPanelTyping(d) {
     panelEl.innerHTML = '';
     panelEl.classList.add('visible');
@@ -242,6 +282,7 @@
       if (chunkI >= flat.length) {
         clearInterval(t);
         fichaBtn.classList.add('shown');
+        maybeShowScrollHint();
         return;
       }
       var chunk = flat[chunkI];
@@ -275,6 +316,7 @@
     fichaBtn.textContent = 'Ver ficha técnica';
     fichaShown = false;
     typedOnce = false;
+    document.getElementById('fichaContainer').scrollTop = 0;
   }
 
   fichaBtn.addEventListener('click', function () {
