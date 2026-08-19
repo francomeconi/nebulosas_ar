@@ -110,6 +110,18 @@
 </a-scene>
 
 <script>
+  // MindAR arma la camara con las dimensiones de la pantalla en el momento
+  // en que arranca, y no se reajusta sola si el telefono gira despues.
+  // La forma confiable de resolverlo es recargar la pagina entera al girar,
+  // asi la camara vuelve a arrancar ya con las proporciones correctas.
+  var lastOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+  window.addEventListener('resize', function () {
+    var current = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+    if (current !== lastOrientation) {
+      location.reload();
+    }
+  });
+
   document.querySelector('a-scene').addEventListener('renderstart', () => {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('hint').classList.remove('hidden');
@@ -221,11 +233,7 @@
     var t = setInterval(function () {
       if (chunkI >= flat.length) {
         clearInterval(t);
-        if (d.anclaje) {
-          revealCaption(d.anclaje, function () { fichaBtn.classList.add('shown'); });
-        } else {
-          fichaBtn.classList.add('shown');
-        }
+        fichaBtn.classList.add('shown');
         return;
       }
       var chunk = flat[chunkI];
@@ -270,7 +278,11 @@
       dimOverlay.style.background = 'rgba(12,12,14,' + VEIL_OPACITY + ')';
       if (!typedOnce) {
         typedOnce = true;
-        startPanelTyping(d);
+        if (d.anclaje) {
+          revealCaption(d.anclaje, function () { startPanelTyping(d); });
+        } else {
+          startPanelTyping(d);
+        }
       } else {
         panelEl.classList.add('visible');
         captionEl.classList.add('visible');
