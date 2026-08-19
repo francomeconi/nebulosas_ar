@@ -24,10 +24,24 @@
   }
   #hint.hidden { opacity:0; }
 
-  #nebulaPanel {
+  #fichaContainer {
     position:fixed; top:56px; left:20px; right:20px; max-width:420px;
+    z-index:30; pointer-events:none;
+  }
+
+  #anclajeCaption {
+    font-family:'Inter', sans-serif; font-style:italic;
+    font-size:13px; line-height:1.4; color:#eee;
+    text-shadow:0 1px 4px rgba(0,0,0,0.9);
+    opacity:0; transition:opacity 0.5s ease; text-align:left;
+    margin-bottom:0; max-height:0; overflow:hidden;
+    transition:opacity 0.5s ease, margin-bottom 0.3s ease, max-height 0.3s ease;
+  }
+  #anclajeCaption.visible { opacity:1; margin-bottom:14px; max-height:300px; }
+
+  #nebulaPanel {
     font-family:'Inter', sans-serif;
-    color:#eaf6ff; z-index:30; pointer-events:none;
+    color:#eaf6ff;
     text-shadow:0 1px 3px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.6);
     opacity:0; transition:opacity 0.3s ease;
     white-space:pre-wrap; font-size:13.5px; line-height:1.4; letter-spacing:0.3px; font-weight:500;
@@ -36,15 +50,6 @@
   #nebulaPanel .label { color:#9fd8ff; opacity:0.85; }
   #nebulaPanel .cursor { display:inline-block; width:7px; background:#eaf6ff; margin-left:1px; animation:blink 0.9s steps(1) infinite; }
   @keyframes blink { 50% { opacity:0; } }
-
-  #anclajeCaption {
-    position:fixed; left:20px; right:20px; bottom:70px; z-index:30;
-    font-family:'Inter', sans-serif; font-style:italic;
-    font-size:13px; line-height:1.4; color:#eee;
-    text-shadow:0 1px 4px rgba(0,0,0,0.9);
-    opacity:0; transition:opacity 0.5s ease; text-align:left; pointer-events:none;
-  }
-  #anclajeCaption.visible { opacity:1; }
 
   #textToggleBtn {
     position:fixed; top:48px; right:16px; z-index:31;
@@ -62,8 +67,10 @@
 <body>
 <div id="loading">Cargando reconocimiento...<br>(permití el acceso a la cámara cuando lo pida)</div>
 <div id="hint" class="hidden">Apuntá la cámara a una foto<br>para ver su información</div>
-<div id="nebulaPanel"></div>
-<div id="anclajeCaption"></div>
+<div id="fichaContainer">
+  <div id="anclajeCaption"></div>
+  <div id="nebulaPanel"></div>
+</div>
 <div id="dimOverlay"></div>
 <button id="textToggleBtn">Ver ficha técnica</button>
 
