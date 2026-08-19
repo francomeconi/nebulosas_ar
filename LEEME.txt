@@ -1,43 +1,30 @@
-TERRAZA AL COSMOS - APP COMPLETA (CARINA + PLEYADES + PILARES + LUNA 9 RECUADROS)
-====================================================================================
+TERRAZA AL COSMOS - APP COMPLETA (24 NEBULOSAS/GALAXIAS + LUNA EN 9 RECUADROS)
+==================================================================================
 
-Version unificada: todo en un solo link, un solo targets.mind con 12
-imagenes (3 nebulosas + 9 recuadros de la Luna).
+33 targets en total. Sin bloqueo de orientacion (funciona vertical y
+horizontal segun la obra).
 
-PASO 1 - Generar targets.mind (las 12 fotos juntas, en orden)
+Pendiente: falta Camaleon 1 y el overlay rehecho de Carina -- avisale a
+Claude cuando los tengas.
+
+Aviso: el overlay de "Casco de Thor" tiene una diferencia de proporcion
+de ~2.6% contra su foto base (decision tomada: seguir igual, deberia
+notarse poco).
+
+PASO 1 - Generar targets.mind (las 33 fotos juntas, en orden)
 --------------------------------------------------------------
 1. Anda a: https://hiukim.github.io/mind-ar-js-doc/tools/compile/
-2. Arrastra las 12 imagenes de la carpeta "compilar-targets" JUNTAS,
-   de una sola vez -- estan numeradas 00 a 11 y el orden importa:
-     00_carina.jpg    -> Carina
-     01_pleyades.jpg  -> Pleyades
-     02_pilares.jpg   -> Pilares de la Creacion
-     03_moon1.jpg  a  11_moon9.jpg -> los 9 recuadros de la Luna
-3. "Start" -- con 12 imagenes va a tardar un rato, mas que las pruebas
-   anteriores. Ten paciencia, no cierres la pestana.
-4. "Download" -> se descarga "targets.mind".
-5. Copialo dentro de esta carpeta (junto a index.html).
+2. Arrastra las 33 imagenes de la carpeta "compilar-targets" JUNTAS,
+   de una sola vez -- numeradas 00 a 32, el orden importa (fijate los
+   nombres de archivo, son descriptivos).
+3. "Start" -- con 33 imagenes va a tardar bastante, se paciente.
+4. "Download" -> se descarga "targets.mind". Copialo a esta carpeta.
 
 PASO 2 - Subir
 --------------------------------------------------------------
-Sube TODO el contenido de esta carpeta (menos "compilar-targets", que
-es solo para generar el target) a tu repo -- podes reemplazar el que
-ya tenias, o crear uno nuevo si preferis mantener version separadas:
-  - index.html
-  - targets.mind (el que acabas de generar)
-  - carina-overlay.png
-  - pleyades-overlay.png
-  - pilares-overlay.png
-  - moon-01-overlay.png a moon-09-overlay.png (9 archivos)
+Sube TODO el contenido de esta carpeta (menos "compilar-targets") a tu
+repo: index.html, targets.mind, y los 33 archivos *-overlay.png/moon-*.png.
 
 PASO 3 - Probar
 --------------------------------------------------------------
-Apunta a cualquiera de las 3 nebulosas o a cualquier recuadro de la
-Luna. Cada nebulosa muestra su propia ficha (igual que antes). Los 9
-recuadros de la Luna comparten la MISMA ficha general (diametro, edad,
-distancia, fecha y lugar de captura, mas la nota sobre el mosaico de
-60.000 cuadros) -- no cambia segun el recuadro, es la info general de
-la pieza completa.
-
-Recorda: el recuadro 9 de la Luna (la zona mas oscura) puede tener
-tracking mas debil que el resto, es esperable.
+Apunta a cualquiera de las obras, vertical u horizontal segun corresponda.
